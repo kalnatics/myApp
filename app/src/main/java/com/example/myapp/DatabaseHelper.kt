@@ -28,7 +28,7 @@ class DatabaseHelper(private val context: Context) :
         onCreate(db)
     }
 
-    // Cek apakah ada user dalam database
+    // Cek
     fun isUserExist(): Boolean {
         val db = this.readableDatabase
         val query = "SELECT COUNT(*) FROM $TABLE_USER"
@@ -44,7 +44,7 @@ class DatabaseHelper(private val context: Context) :
         return exists
     }
 
-    // Menambahkan user baru ke database
+    // adduser baru ke database
     fun addUser(username: String, password: String): Boolean {
         val db = this.writableDatabase
         val values = ContentValues()
@@ -67,10 +67,10 @@ class DatabaseHelper(private val context: Context) :
         db.close()
         return isValid
     }
-    fun deleteAllUsers(): Boolean {
-        val db = this.writableDatabase
-        val result = db.delete(TABLE_USER, null, null)
-        db.close()
-        return result > 0
-    }
+//    fun deleteAllUsers(): Boolean {
+//        val db = this.writableDatabase
+//        val result = db.delete(TABLE_USER, null, null)
+//        db.close()
+//        return result > 0
+//    }
 }
