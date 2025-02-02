@@ -45,25 +45,91 @@ class MainActivity : AppCompatActivity() {
 }
 
 class LoginActivity : AppCompatActivity() {
+
+    private lateinit var sqliteHelper: DatabaseHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        sqliteHelper = DatabaseHelper(this)
+
+        // Cek apakah user sudah terdaftar
+        if (!sqliteHelper.isUserExist()) {
+            // Jika tidak ada user di database, langsung ke halaman register
+            val intent = Intent(this, SignupActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
         val usernameInput = findViewById<EditText>(R.id.username)
         val passwordInput = findViewById<EditText>(R.id.password)
         val loginButton = findViewById<Button>(R.id.loginButton)
+        val tvGoToRegister = findViewById<TextView>(R.id.tvGoToRegister)
 
         loginButton.setOnClickListener {
             val username = usernameInput.text.toString()
             val password = passwordInput.text.toString()
 
-            if (username == "admin" && password == "1234") {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+            if (sqliteHelper.checkLogin(username, password)) {
+                Toast.makeText(this, "Login Berhasil", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, MainActivity::class.java))
                 finish()
             } else {
                 Toast.makeText(this, "Login Gagal", Toast.LENGTH_SHORT).show()
             }
+        }
+        val btnResetDatabase = findViewById<Button>(R.id.btnResetDatabase)
+        btnResetDatabase.setOnClickListener {
+            sqliteHelper.deleteAllUsers()
+            Toast.makeText(this, "Semua data user dihapus!", Toast.LENGTH_SHORT).show()
+        }
+
+        tvGoToRegister.setOnClickListener {
+            val intent = Intent(this, SignupActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+    }
+}
+
+
+class SignupActivity : AppCompatActivity() {
+
+    private lateinit var sqliteHelper: DatabaseHelper
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_signup)
+
+        sqliteHelper = DatabaseHelper(this)
+
+        val usernameInput = findViewById<EditText>(R.id.username)
+        val passwordInput = findViewById<EditText>(R.id.password)
+        val signupButton = findViewById<Button>(R.id.signupButton)
+        val tvGoToLogin = findViewById<TextView>(R.id.tvGoToLogin)
+
+        signupButton.setOnClickListener {
+            val username = usernameInput.text.toString()
+            val password = passwordInput.text.toString()
+
+            if (username.isNotEmpty() && password.isNotEmpty()) {
+                if (sqliteHelper.addUser(username, password)) {
+                    Toast.makeText(this, "Registrasi Berhasil", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this, "Registrasi Gagal", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Username & Password tidak boleh kosong", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        tvGoToLogin.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
 }
