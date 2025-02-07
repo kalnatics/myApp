@@ -102,11 +102,11 @@ class LoginActivity : AppCompatActivity() {
                     .show()
             }
         }
-//        val btnResetDatabase = findViewById<Button>(R.id.btnResetDatabase)
-//        btnResetDatabase.setOnClickListener {
-//            sqliteHelper.deleteAllUsers()
-//            Toast.makeText(this, "Semua data user dihapus!", Toast.LENGTH_SHORT).show()
-//        }
+        val btnResetDatabase = findViewById<Button>(R.id.btnResetDatabase)
+        btnResetDatabase.setOnClickListener {
+            sqliteHelper.deleteAllUsers()
+            Toast.makeText(this, "Semua data user dihapus!", Toast.LENGTH_SHORT).show()
+        }
 
         tvGoToRegister.setOnClickListener {
             val intent = Intent(this, SignupActivity::class.java)

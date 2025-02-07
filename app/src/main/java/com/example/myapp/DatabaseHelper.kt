@@ -67,10 +67,10 @@ class DatabaseHelper(private val context: Context) :
         db.close()
         return isValid
     }
-//    fun deleteAllUsers(): Boolean {
-//        val db = this.writableDatabase
-//        val result = db.delete(TABLE_USER, null, null)
-//        db.close()
-//        return result > 0
-//    }
+    fun deleteAllUsers(): Boolean {
+        val db = this.writableDatabase
+        val result = db.delete(TABLE_USER, null, null)
+        db.close()
+        return result > 0
+    }
 }
