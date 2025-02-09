@@ -36,6 +36,12 @@ class MainActivity : AppCompatActivity() {
                 .show()
         }
     }
+
+    fun openNotesApp(view: View) {
+        val intent = Intent(this, NotesActivity::class.java)
+        startActivity(intent)
+    }
+
     fun openCalculator(view: View) {
         val intent = Intent(this, CalculatorActivity::class.java)
         startActivity(intent)
