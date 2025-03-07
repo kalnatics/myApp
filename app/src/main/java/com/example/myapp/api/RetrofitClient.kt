@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://3ee0-2001-448a-2075-461f-f9a1-9df5-1f54-34d1.ngrok-free.app/api/" // Ganti dengan URL Laravel API
+    private const val BASE_URL = "https://6bfe-182-2-140-150.ngrok-free.app/api/" // Ganti dengan URL Laravel API
 
     val instance: ApiService by lazy {
         val retrofit = Retrofit.Builder()

@@ -9,6 +9,18 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.myapp.adapters.BookAdapter
+import com.example.myapp.models.Book
+import android.app.Activity
+import android.content.Context
+import android.net.Uri
+import android.provider.MediaStore
+import android.widget.ImageView
+import com.squareup.picasso.Picasso
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +51,11 @@ class MainActivity : AppCompatActivity() {
 
     fun openNotesApp(view: View) {
         val intent = Intent(this, NotesActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun openOurBook(view: View) {
+        val intent = Intent(this, BookMainActivity::class.java)
         startActivity(intent)
     }
 
@@ -381,4 +398,124 @@ class CalculatorActivity : AppCompatActivity() {
         }
     }
 }
+
+class BookMainActivity : AppCompatActivity() {
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var bookAdapter: BookAdapter
+    private lateinit var databaseHelper: DatabaseHelper
+    private lateinit var btnInfo: Button
+    private lateinit var fabAddBook: FloatingActionButton
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_book_main)
+
+        databaseHelper = DatabaseHelper(this)
+        recyclerView = findViewById(R.id.recyclerViewBooks)
+        btnInfo = findViewById(R.id.btnInfo)
+        fabAddBook = findViewById(R.id.fabAddBook)
+
+        val books = databaseHelper.getAllBooks().toMutableList()
+
+        // 🔹 Pastikan memanggil adapter dengan benar
+        bookAdapter = BookAdapter(books,
+            onItemClick = { book ->
+                val intent = Intent(this, BookDetailActivity::class.java)
+                intent.putExtra("BOOK_ID", book.id)
+                startActivity(intent)
+            },
+            onDeleteClick = { book ->
+                databaseHelper.deleteBook(book.id)
+                refreshBookList()
+            }
+        )
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = bookAdapter
+
+        btnInfo.setOnClickListener {
+            startActivity(Intent(this, AboutActivity::class.java))
+        }
+
+        fabAddBook.setOnClickListener {
+            val intent = Intent(this, AddBookActivity::class.java)
+            startActivityForResult(intent, 200)
+        }
+    }
+
+    // Terima hasil dari AddBookActivity
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if ((requestCode == 200 || requestCode == 300) && resultCode == Activity.RESULT_OK) {
+            refreshBookList()
+        }
+    }
+
+    // Fungsi untuk refresh data
+    private fun refreshBookList() {
+        val books = databaseHelper.getAllBooks().toMutableList()
+        bookAdapter.updateBooks(books)
+        bookAdapter.notifyDataSetChanged()
+    }
+    override fun onResume() {
+        super.onResume()
+        refreshBookList() // Refresh data setelah kembali dari aktivitas lain
+    }
+
+}
+
+class AboutActivity : AppCompatActivity() {
+
+    private lateinit var profileImage: ImageView
+    private lateinit var btnChangePhoto: Button
+    private lateinit var btnBack: Button
+    private val PICK_IMAGE_REQUEST = 101
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_about)
+
+        profileImage = findViewById(R.id.profileImage)
+        btnChangePhoto = findViewById(R.id.btnChangePhoto)
+        btnBack = findViewById(R.id.btnBack)
+
+        // Load foto dari SharedPreferences jika sudah ada
+        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val savedImageUri = sharedPref.getString("profile_photo", null)
+        if (savedImageUri != null) {
+            Picasso.get().load(Uri.parse(savedImageUri)).into(profileImage)
+        }
+
+        btnChangePhoto.setOnClickListener {
+            pickImageFromGallery()
+        }
+        btnBack.setOnClickListener {
+            finish() // Menutup activity dan kembali ke sebelumnya
+        }
+
+    }
+
+    private fun pickImageFromGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            val imageUri = data.data
+            profileImage.setImageURI(imageUri)
+
+            // Simpan URI ke SharedPreferences
+            val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                putString("profile_photo", imageUri.toString())
+                apply()
+            }
+        }
+    }
+}
+
+
 
